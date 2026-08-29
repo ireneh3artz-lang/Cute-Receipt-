@@ -2,300 +2,234 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cute Forest & Cottagecore Receipt Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cute Receipt Generator</title>
   <style>
-    :root {
-      --bg-color: #f2f5f3;
-      --panel-bg: #ffffff;
-      --accent-color: #768a76;
-      --text-color: #3b473b;
-    }
-
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #f2f5f3;
       margin: 0;
       padding: 20px;
       display: flex;
-      gap: 30px;
+      gap: 20px;
       justify-content: center;
       align-items: flex-start;
     }
 
-    /* Control Panel Styling */
     .controls-panel {
-      background: var(--panel-bg);
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      width: 340px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 300px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    .controls-panel h2 {
-      margin-top: 0;
-      color: var(--accent-color);
-      font-size: 1.3rem;
-    }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-weight: bold; font-size: 0.8rem; margin-bottom: 4px; }
+    .form-group input, select { width: 100%; padding: 6px; box-sizing: border-box; }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-
-    .item-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .item-row input[type="text"] { flex: 2; }
-    .item-row input[type="number"] { flex: 1; }
+    .item-row { display: flex; gap: 4px; margin-bottom: 6px; }
+    .item-row input { font-size: 0.8rem; }
 
     button {
-      background: var(--accent-color);
+      background: #768a76;
       color: white;
       border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
       cursor: pointer;
-      font-weight: 600;
-      width: 100%;
-      margin-top: 10px;
+      font-weight: bold;
     }
 
-    button.btn-secondary {
-      background: #e2e8e2;
-      color: var(--text-color);
-    }
-
-    /* Receipt Canvas Preview */
-    .preview-panel {
-      position: relative;
-    }
-
-    .receipt-ticket {
+    /* Fixed Canvas Template Container */
+    .receipt-container {
       width: 360px;
-      min-height: 640px;
-      background-color: #fff;
+      height: 640px;
       background-size: cover;
       background-position: center;
-      border-radius: 12px;
-      padding: 140px 30px 40px 30px;
-      box-sizing: border-box;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      font-family: 'Courier New', Courier, monospace;
-      color: #3d4a3d;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .receipt-header {
-      text-align: center;
-      font-size: 0.85rem;
-      border-bottom: 1px dashed #768a76;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
-    }
-
-    .receipt-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
-    .receipt-table th {
-      text-align: left;
-      border-bottom: 1px dashed #768a76;
-      padding-bottom: 5px;
-    }
-
-    .receipt-table td {
-      padding: 6px 0;
-    }
-
-    .receipt-table .num {
-      text-align: right;
-    }
-
-    .receipt-total {
-      border-top: 1px dashed #768a76;
-      margin-top: 15px;
-      padding-top: 10px;
-      display: flex;
-      justify-content: space-between;
+      background-repeat: no-repeat;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
       font-weight: bold;
-      font-size: 1rem;
+      color: #3b473b;
+      box-sizing: border-box;
     }
 
-    .receipt-footer {
+    .field-order-no { position: absolute; top: 22%; left: 12%; font-size: 0.8rem; }
+    .field-date { position: absolute; top: 22%; right: 12%; font-size: 0.8rem; }
+
+    .items-area {
+      position: absolute;
+      top: 32%;
+      left: 10%;
+      width: 80%;
+      height: 40%;
+      overflow: hidden;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed #768a76;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+
+    .item-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+    
+    .col-name { width: 45%; text-align: left; }
+    .col-qty { width: 20%; text-align: center; }
+    .col-price { width: 35%; text-align: right; }
+
+    .field-total {
+      position: absolute;
+      bottom: 20%;
+      right: 12%;
+      font-size: 1.1rem;
+      border-top: 1px dashed #768a76;
+      padding-top: 4px;
+      width: 76%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .field-footer {
+      position: absolute;
+      bottom: 12%;
+      width: 100%;
       text-align: center;
       font-size: 0.75rem;
-      margin-top: 20px;
       font-style: italic;
     }
 
     @media print {
       body * { visibility: hidden; }
-      .receipt-ticket, .receipt-ticket * { visibility: visible; }
-      .receipt-ticket { position: absolute; left: 0; top: 0; }
+      .receipt-container, .receipt-container * { visibility: visible; }
+      .receipt-container { position: absolute; left: 0; top: 0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Input Form -->
   <div class="controls-panel">
-    <h2>🌲 Receipt Builder</h2>
-    
+    <h3>Receipt Inputs</h3>
     <div class="form-group">
-      <label>Order Number</label>
-      <input type="text" id="orderNo" value="#1001" oninput="updateReceipt()">
+      <label>Order No</label>
+      <input type="text" id="orderNo" value="#1001" oninput="render()">
     </div>
-    
     <div class="form-group">
       <label>Date</label>
-      <input type="date" id="orderDate" oninput="updateReceipt()">
+      <input type="date" id="orderDate" oninput="render()">
+    </div>
+    <div class="form-group">
+      <label>Template</label>
+      <select id="bgPicker" onchange="render()">
+        <option value="59902.jpg">Sage Bows (Gingham)</option>
+        <option value="59901.jpg">Pink Ribbon</option>
+        <option value="59903.jpg">Blossom Cafe</option>
+      </select>
     </div>
 
     <div class="form-group">
       <label>Items</label>
       <div id="itemList">
         <div class="item-row">
-          <input type="text" class="item-name" value="Jake the Dog" oninput="updateReceipt()">
-          <input type="number" class="item-qty" value="1" min="1" oninput="updateReceipt()">
-          <input type="number" class="item-price" value="7000" oninput="updateReceipt()">
+          <input type="text" class="i-name" value="Jake the Dog" placeholder="Item" oninput="render()">
+          <input type="number" class="i-qty" value="1" placeholder="Qty" oninput="render()">
+          <input type="number" class="i-price" value="7000" placeholder="Price" oninput="render()">
         </div>
       </div>
-      <button class="btn-secondary" onclick="addItemRow()">+ Add Item</button>
+      <button onclick="addRow()" style="margin-top: 6px;">+ Add Item</button>
     </div>
-
-    <div class="form-group">
-      <label>Background Aesthetic</label>
-      <select id="bgPicker" onchange="changeBackground()">
-        <option value="sage">Sage Green Bows (Gingham)</option>
-        <option value="pink">Coquette Pink Bows</option>
-        <option value="blossom">Floral Blossom Cafe</option>
-      </select>
-    </div>
-
-    <button onclick="window.print()">Print / Save as PDF</button>
+    <button onclick="window.print()" style="margin-top:15px; width:100%;">Print / Save PDF</button>
   </div>
 
-  <!-- Receipt Preview Display -->
-  <div class="preview-panel">
-    <div class="receipt-ticket" id="receiptTicket">
-      <div>
-        <div class="receipt-header">
-          <div>ORDER: <span id="dispOrderNo">#1001</span></div>
-          <div>DATE: <span id="dispDate">2026-08-29</span></div>
-        </div>
-
-        <table class="receipt-table">
-          <thead>
-            <tr>
-              <th>ITEM</th>
-              <th class="num">QTY</th>
-              <th class="num">PRICE</th>
-            </tr>
-          </thead>
-          <tbody id="dispItems">
-            <!-- Dynamic Items -->
-          </tbody>
-        </table>
+  <!-- Receipt Output Canvas -->
+  <div class="receipt-container" id="ticket">
+    <div class="field-order-no">ORDER: <span id="outOrder">#1001</span></div>
+    <div class="field-date">DATE: <span id="outDate"></span></div>
+    
+    <div class="items-area">
+      <div class="item-header">
+        <span class="col-name">ITEM</span>
+        <span class="col-qty">QTY</span>
+        <span class="col-price">PRICE</span>
       </div>
+      <div id="outItems"></div>
+    </div>
 
-      <div>
-        <div class="receipt-total">
-          <span>TOTAL:</span>
-          <span id="dispTotal">0</span>
-        </div>
-        <div class="receipt-footer">
-          ✨ Handmade with love in the woods ✨
-        </div>
-      </div>
+    <div class="field-total">
+      <span>TOTAL:</span>
+      <span id="outTotal">0</span>
+    </div>
+
+    <div class="field-footer">
+      ✨ Handmade with love in the woods ✨
     </div>
   </div>
 
   <script>
-    // Set default date to today
     document.getElementById('orderDate').valueAsDate = new Date();
 
-    function addItemRow() {
-      const container = document.getElementById('itemList');
+    function addRow() {
       const div = document.createElement('div');
       div.className = 'item-row';
       div.innerHTML = `
-        <input type="text" class="item-name" placeholder="Item" oninput="updateReceipt()">
-        <input type="number" class="item-qty" value="1" min="1" oninput="updateReceipt()">
-        <input type="number" class="item-price" placeholder="Price" oninput="updateReceipt()">
+        <input type="text" class="i-name" placeholder="Item" oninput="render()">
+        <input type="number" class="i-qty" value="1" placeholder="Qty" oninput="render()">
+        <input type="number" class="i-price" placeholder="Price" oninput="render()">
       `;
-      container.appendChild(div);
-      updateReceipt();
+      document.getElementById('itemList').appendChild(div);
+      render();
     }
 
-    function updateReceipt() {
-      document.getElementById('dispOrderNo').innerText = document.getElementById('orderNo').value;
-      document.getElementById('dispDate').innerText = document.getElementById('orderDate').value;
+    function render() {
+      // Background Image
+      const bg = document.getElementById('bgPicker').value;
+      document.getElementById('ticket').style.backgroundImage = `url('${bg}')`;
 
-      const names = document.querySelectorAll('.item-name');
-      const qtys = document.querySelectorAll('.item-qty');
-      const prices = document.querySelectorAll('.item-price');
+      // Header Info
+      document.getElementById('outOrder').innerText = document.getElementById('orderNo').value;
+      document.getElementById('outDate').innerText = document.getElementById('orderDate').value;
+
+      // Table & Calculation
+      const names = document.querySelectorAll('.i-name');
+      const qtys = document.querySelectorAll('.i-qty');
+      const prices = document.querySelectorAll('.i-price');
       
-      const tbody = document.getElementById('dispItems');
-      tbody.innerHTML = '';
+      const container = document.getElementById('outItems');
+      container.innerHTML = '';
       let total = 0;
 
       for (let i = 0; i < names.length; i++) {
-        const name = names[i].value || 'Item';
+        const name = names[i].value || '';
         const qty = parseInt(qtys[i].value) || 0;
         const price = parseFloat(prices[i].value) || 0;
-        const itemTotal = qty * price;
-        total += itemTotal;
+        const lineTotal = qty * price;
+        total += lineTotal;
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${name}</td>
-          <td class="num">${qty}</td>
-          <td class="num">${itemTotal.toLocaleString()}</td>
-        `;
-        tbody.appendChild(tr);
+        if (name) {
+          const row = document.createElement('div');
+          row.className = 'item-line';
+          row.innerHTML = `
+            <span class="col-name">${name}</span>
+            <span class="col-qty">${qty}</span>
+            <span class="col-price">${lineTotal.toLocaleString()}</span>
+          `;
+          container.appendChild(row);
+        }
       }
 
-      document.getElementById('dispTotal').innerText = total.toLocaleString();
+      document.getElementById('outTotal').innerText = total.toLocaleString();
     }
 
-    function changeBackground() {
-      const picker = document.getElementById('bgPicker').value;
-      const ticket = document.getElementById('receiptTicket');
-      
-      if (picker === 'sage') {
-        ticket.style.backgroundImage = 'url("59902.jpg")';
-      } else if (picker === 'pink') {
-        ticket.style.backgroundImage = 'url("59901.jpg")';
-      } else if (picker === 'blossom') {
-        ticket.style.backgroundImage = 'url("59903.jpg")';
-      }
-    }
-
-    // Initial setup
-    changeBackground();
-    updateReceipt();
+    render();
   </script>
 </body>
 </html>
