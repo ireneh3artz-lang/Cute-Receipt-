@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cute Receipt Generator</title>
-  <!-- Library to convert DOM element to Canvas/Image -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg-color: #f2f5f3;
+      --bg-color: #f4f6f4;
       --panel-bg: #ffffff;
-      --accent-color: #768a76;
-      --text-color: #3b473b;
+      --accent-color: #6b7c6b;
+      --text-color: #2c352c;
     }
 
     body {
@@ -85,12 +84,13 @@
       background: var(--accent-color);
       color: white;
       border: none;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       width: 100%;
       margin-top: 10px;
+      font-size: 0.95rem;
     }
 
     button.btn-secondary {
@@ -105,7 +105,7 @@
       margin-top: 5px;
     }
 
-    /* Receipt Canvas Display */
+    /* Receipt Frame - Scaled precisely to template ratio */
     .receipt-ticket {
       width: 360px;
       height: 640px;
@@ -113,68 +113,62 @@
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
-      border-radius: 12px;
-      padding: 130px 30px 40px 30px;
-      box-sizing: border-box;
+      border-radius: 8px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.12);
       font-family: 'Courier New', Courier, monospace;
-      color: #3d4a3d;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      color: #3b473b;
+      position: relative;
+      box-sizing: border-box;
     }
 
-    .receipt-header {
-      text-align: center;
-      font-size: 0.85rem;
-      border-bottom: 1px dashed #768a76;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
+    /* Absolute Placement Overlay Areas */
+    .overlay-header {
+      position: absolute;
+      top: 165px;
+      left: 55px;
+      right: 55px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .overlay-body {
+      position: absolute;
+      top: 215px;
+      left: 45px;
+      right: 45px;
+      height: 250px;
+      overflow: hidden;
     }
 
     .receipt-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
-    .receipt-table th {
-      text-align: left;
-      border-bottom: 1px dashed #768a76;
-      padding-bottom: 5px;
+      font-size: 0.82rem;
     }
 
     .receipt-table td {
-      padding: 6px 0;
+      padding: 4px 0;
     }
 
     .receipt-table .num {
       text-align: right;
     }
 
-    .receipt-total {
-      border-top: 1px dashed #768a76;
-      margin-top: 15px;
-      padding-top: 10px;
-      display: flex;
-      justify-content: space-between;
+    .overlay-total {
+      position: absolute;
+      bottom: 145px;
+      right: 55px;
+      font-size: 1.05rem;
       font-weight: bold;
-      font-size: 1rem;
-    }
-
-    .receipt-footer {
-      text-align: center;
-      font-size: 0.75rem;
-      margin-top: 20px;
-      font-style: italic;
     }
   </style>
 </head>
 <body>
 
-  <!-- Controls Panel -->
   <div class="controls-panel">
-    <h2>🌲 Receipt Builder</h2>
+    <h2>🌲 Receipt Generator</h2>
     
     <div class="form-group">
       <label>Order Number</label>
@@ -187,11 +181,11 @@
     </div>
 
     <div class="form-group">
-      <label>Background Aesthetic</label>
+      <label>Template Aesthetic</label>
       <select id="bgPicker" onchange="updateReceipt()">
-        <option value="59902.jpg">Sage Green Bows (Gingham)</option>
-        <option value="59901.jpg">Coquette Pink Bows</option>
-        <option value="59903.jpg">Blossom Cafe</option>
+        <option value="59928.jpg">Sage Bows & Gingham</option>
+        <option value="59929.jpg">Coquette Pink Bows</option>
+        <option value="59927.jpg">Doodle Star & Hearts</option>
       </select>
     </div>
 
@@ -199,7 +193,7 @@
       <label>Items</label>
       <div id="itemList">
         <div class="item-row">
-          <input type="text" class="item-name" value="Jake the Dog" placeholder="Item" oninput="updateReceipt()">
+          <input type="text" class="item-name" value="Jake Dog" placeholder="Item" oninput="updateReceipt()">
           <input type="number" class="item-qty" value="1" min="1" placeholder="Qty" oninput="updateReceipt()">
           <input type="number" class="item-price" value="7000" placeholder="Price" oninput="updateReceipt()">
           <button class="btn-delete" onclick="removeItemRow(this)">✕</button>
@@ -208,38 +202,24 @@
       <button class="btn-secondary" onclick="addItemRow()">+ Add Item</button>
     </div>
 
-    <button class="btn-main" onclick="downloadReceipt()">Save Receipt Image</button>
+    <button class="btn-main" onclick="downloadReceipt()">Save High-Res Image</button>
   </div>
 
-  <!-- Receipt Canvas Output -->
   <div class="receipt-ticket" id="receiptTicket">
-    <div>
-      <div class="receipt-header">
-        <div>ORDER: <span id="dispOrderNo">#1001</span></div>
-        <div>DATE: <span id="dispDate">2026-08-29</span></div>
-      </div>
+    <div class="overlay-header">
+      <span id="dispOrderNo">#1001</span>
+      <span id="dispDate">2026-08-29</span>
+    </div>
 
+    <div class="overlay-body">
       <table class="receipt-table">
-        <thead>
-          <tr>
-            <th>ITEM</th>
-            <th class="num">QTY</th>
-            <th class="num">PRICE</th>
-          </tr>
-        </thead>
         <tbody id="dispItems">
         </tbody>
       </table>
     </div>
 
-    <div>
-      <div class="receipt-total">
-        <span>TOTAL:</span>
-        <span id="dispTotal">0</span>
-      </div>
-      <div class="receipt-footer">
-        ✨ Handmade with love in the woods ✨
-      </div>
+    <div class="overlay-total">
+      <span id="dispTotal">0</span>
     </div>
   </div>
 
@@ -261,21 +241,40 @@
     }
 
     function removeItemRow(btn) {
-      const row = btn.parentElement;
-      row.remove();
+      btn.parentElement.remove();
       updateReceipt();
     }
 
     function updateReceipt() {
-      // Background Switch
-      const picker = document.getElementById('bgPicker').value;
-      document.getElementById('receiptTicket').style.backgroundImage = `url('${picker}')`;
+      const selectedBg = document.getElementById('bgPicker').value;
+      const ticket = document.getElementById('receiptTicket');
+      ticket.style.backgroundImage = `url('${selectedBg}')`;
 
-      // Header values
+      // Positional tweaking based on template structure
+      const header = document.querySelector('.overlay-header');
+      const body = document.querySelector('.overlay-body');
+      const totalDisplay = document.querySelector('.overlay-total');
+
+      if (selectedBg === '59927.jpg') {
+        // Black and white doodle template adjustments
+        header.style.top = '70px';
+        body.style.top = '175px';
+        totalDisplay.style.bottom = '195px';
+      } else if (selectedBg === '59929.jpg') {
+        // Pink bow template adjustments
+        header.style.top = '150px';
+        body.style.top = '210px';
+        totalDisplay.style.bottom = '165px';
+      } else {
+        // Sage green template adjustments
+        header.style.top = '168px';
+        body.style.top = '220px';
+        totalDisplay.style.bottom = '145px';
+      }
+
       document.getElementById('dispOrderNo').innerText = document.getElementById('orderNo').value;
       document.getElementById('dispDate').innerText = document.getElementById('orderDate').value;
 
-      // Table & Totals calculation
       const names = document.querySelectorAll('.item-name');
       const qtys = document.querySelectorAll('.item-qty');
       const prices = document.querySelectorAll('.item-price');
@@ -285,19 +284,21 @@
       let total = 0;
 
       for (let i = 0; i < names.length; i++) {
-        const name = names[i].value || 'Item';
+        const name = names[i].value || '';
         const qty = parseInt(qtys[i].value) || 0;
         const price = parseFloat(prices[i].value) || 0;
-        const itemTotal = qty * price;
-        total += itemTotal;
+        const lineTotal = qty * price;
+        total += lineTotal;
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${name}</td>
-          <td class="num">${qty}</td>
-          <td class="num">${itemTotal.toLocaleString()}</td>
-        `;
-        tbody.appendChild(tr);
+        if (name) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="width: 50%;">${name}</td>
+            <td class="num" style="width: 20%;">${qty}</td>
+            <td class="num" style="width: 30%;">${lineTotal.toLocaleString()}</td>
+          `;
+          tbody.appendChild(tr);
+        }
       }
 
       document.getElementById('dispTotal').innerText = total.toLocaleString();
@@ -307,7 +308,7 @@
       const ticket = document.getElementById('receiptTicket');
       html2canvas(ticket, {
         useCORS: true,
-        scale: 2
+        scale: 3
       }).then(canvas => {
         const link = document.createElement('a');
         link.download = `receipt-${document.getElementById('orderNo').value}.png`;
