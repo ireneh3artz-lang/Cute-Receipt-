@@ -7,10 +7,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg-color: #f4f6f4;
+      --bg-color: #f0f4f1;
       --panel-bg: #ffffff;
-      --accent-color: #6b7c6b;
-      --text-color: #2c352c;
+      --accent-color: #6b8e6b;
+      --text-color: #2d372d;
     }
 
     body {
@@ -32,7 +32,7 @@
       padding: 24px;
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      width: 340px;
+      width: 320px;
     }
 
     .controls-panel h2 {
@@ -41,17 +41,8 @@
       font-size: 1.3rem;
     }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; }
     .form-group input, .form-group select {
       width: 100%;
       padding: 8px 12px;
@@ -105,63 +96,105 @@
       margin-top: 5px;
     }
 
-    /* Receipt Frame - Scaled precisely to template ratio */
-    .receipt-ticket {
-      width: 360px;
-      height: 640px;
-      background-color: #fff;
-      background-size: 100% 100%;
-      background-position: center;
-      background-repeat: no-repeat;
-      border-radius: 8px;
+    /* Outer Wrapper for Print Frame */
+    .receipt-wrapper {
+      padding: 15px;
+      background: #ffffff;
+      border-radius: 16px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      font-family: 'Courier New', Courier, monospace;
-      color: #3b473b;
-      position: relative;
-      box-sizing: border-box;
     }
 
-    /* Absolute Placement Overlay Areas */
-    .overlay-header {
-      position: absolute;
-      top: 165px;
-      left: 55px;
-      right: 55px;
+    /* Core Receipt Ticket Box */
+    .receipt-ticket {
+      width: 330px;
+      min-height: 580px;
+      padding: 25px;
+      box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    /* ---------------- DESIGN TEMPLATE 1: SAGE GINGHAM ---------------- */
+    .theme-sage {
+      background-color: #f4f7f4;
+      background-image: 
+        linear-gradient(90deg, rgba(107, 142, 107, 0.12) 50%, transparent 50%),
+        linear-gradient(rgba(107, 142, 107, 0.12) 50%, transparent 50%);
+      background-size: 20px 20px;
+      border: 2px dashed #8ba88b;
+      color: #384738;
+    }
+    .theme-sage .receipt-title { color: #527052; font-size: 1.4rem; text-align: center; font-weight: bold; }
+    .theme-sage th { border-bottom: 2px dashed #8ba88b; }
+    .theme-sage .receipt-total-box { border-top: 2px dashed #8ba88b; border-bottom: 2px dashed #8ba88b; }
+
+    /* ---------------- DESIGN TEMPLATE 2: COQUETTE PINK ---------------- */
+    .theme-pink {
+      background-color: #fff8fa;
+      border: 3px double #f3b0c3;
+      color: #633843;
+      background-image: radial-gradient(#f7d6e0 15%, transparent 16%);
+      background-size: 18px 18px;
+    }
+    .theme-pink .receipt-title { color: #d87093; font-size: 1.4rem; text-align: center; font-weight: bold; }
+    .theme-pink th { border-bottom: 2px solid #f3b0c3; }
+    .theme-pink .receipt-total-box { border-top: 2px solid #f3b0c3; border-bottom: 2px solid #f3b0c3; }
+
+    /* ---------------- DESIGN TEMPLATE 3: MONOCHROME DOODLE ---------------- */
+    .theme-doodle {
+      background-color: #ffffff;
+      border: 2px solid #222222;
+      box-shadow: 4px 4px 0px #222222;
+      color: #111111;
+    }
+    .theme-doodle .receipt-title { color: #111111; font-size: 1.5rem; text-align: center; font-weight: bold; text-decoration: underline; }
+    .theme-doodle th { border-bottom: 2px solid #222222; }
+    .theme-doodle .receipt-total-box { border-top: 2px solid #222222; border-bottom: 2px solid #222222; }
+
+    /* Shared Typography & Table Formatting */
+    .receipt-header-info {
+      font-size: 0.8rem;
+      margin: 12px 0;
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-
-    .overlay-body {
-      position: absolute;
-      top: 215px;
-      left: 45px;
-      right: 45px;
-      height: 250px;
-      overflow: hidden;
     }
 
     .receipt-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.82rem;
+      margin-top: 10px;
+    }
+
+    .receipt-table th {
+      padding-bottom: 6px;
+      text-align: left;
     }
 
     .receipt-table td {
-      padding: 4px 0;
+      padding: 6px 0;
     }
 
-    .receipt-table .num {
-      text-align: right;
-    }
+    .receipt-table .num { text-align: right; }
 
-    .overlay-total {
-      position: absolute;
-      bottom: 145px;
-      right: 55px;
-      font-size: 1.05rem;
+    .receipt-total-box {
+      margin-top: 15px;
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-between;
       font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .receipt-footer-text {
+      text-align: center;
+      font-size: 0.75rem;
+      margin-top: 20px;
+      font-style: italic;
     }
   </style>
 </head>
@@ -181,11 +214,11 @@
     </div>
 
     <div class="form-group">
-      <label>Template Aesthetic</label>
-      <select id="bgPicker" onchange="updateReceipt()">
-        <option value="59928.jpg">Sage Bows & Gingham</option>
-        <option value="59929.jpg">Coquette Pink Bows</option>
-        <option value="59927.jpg">Doodle Star & Hearts</option>
+      <label>Select Custom Theme</label>
+      <select id="themePicker" onchange="updateReceipt()">
+        <option value="theme-sage">🌿 Sage Forest Gingham</option>
+        <option value="theme-pink">🎀 Coquette Pink Bow</option>
+        <option value="theme-doodle">✨ Monochrome Doodle</option>
       </select>
     </div>
 
@@ -202,24 +235,40 @@
       <button class="btn-secondary" onclick="addItemRow()">+ Add Item</button>
     </div>
 
-    <button class="btn-main" onclick="downloadReceipt()">Save High-Res Image</button>
+    <button class="btn-main" onclick="downloadReceipt()">Save Crisp Image</button>
   </div>
 
-  <div class="receipt-ticket" id="receiptTicket">
-    <div class="overlay-header">
-      <span id="dispOrderNo">#1001</span>
-      <span id="dispDate">2026-08-29</span>
-    </div>
+  <div class="receipt-wrapper">
+    <div class="receipt-ticket theme-sage" id="receiptTicket">
+      <div>
+        <div class="receipt-title" id="dispTitle">RECEIPT</div>
+        <div class="receipt-header-info">
+          <span>ORDER: <strong id="dispOrderNo">#1001</strong></span>
+          <span>DATE: <strong id="dispDate">2026-08-29</strong></span>
+        </div>
 
-    <div class="overlay-body">
-      <table class="receipt-table">
-        <tbody id="dispItems">
-        </tbody>
-      </table>
-    </div>
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th style="width: 50%;">ITEM</th>
+              <th class="num" style="width: 20%;">QTY</th>
+              <th class="num" style="width: 30%;">PRICE</th>
+            </tr>
+          </thead>
+          <tbody id="dispItems">
+          </tbody>
+        </table>
+      </div>
 
-    <div class="overlay-total">
-      <span id="dispTotal">0</span>
+      <div>
+        <div class="receipt-total-box">
+          <span>TOTAL:</span>
+          <span id="dispTotal">0</span>
+        </div>
+        <div class="receipt-footer-text">
+          ✨ Handmade with love in the woods ✨
+        </div>
+      </div>
     </div>
   </div>
 
@@ -246,35 +295,17 @@
     }
 
     function updateReceipt() {
-      const selectedBg = document.getElementById('bgPicker').value;
       const ticket = document.getElementById('receiptTicket');
-      ticket.style.backgroundImage = `url('${selectedBg}')`;
+      const selectedTheme = document.getElementById('themePicker').value;
+      
+      // Update theme classes
+      ticket.className = `receipt-ticket ${selectedTheme}`;
 
-      // Positional tweaking based on template structure
-      const header = document.querySelector('.overlay-header');
-      const body = document.querySelector('.overlay-body');
-      const totalDisplay = document.querySelector('.overlay-total');
-
-      if (selectedBg === '59927.jpg') {
-        // Black and white doodle template adjustments
-        header.style.top = '70px';
-        body.style.top = '175px';
-        totalDisplay.style.bottom = '195px';
-      } else if (selectedBg === '59929.jpg') {
-        // Pink bow template adjustments
-        header.style.top = '150px';
-        body.style.top = '210px';
-        totalDisplay.style.bottom = '165px';
-      } else {
-        // Sage green template adjustments
-        header.style.top = '168px';
-        body.style.top = '220px';
-        totalDisplay.style.bottom = '145px';
-      }
-
+      // Update header details
       document.getElementById('dispOrderNo').innerText = document.getElementById('orderNo').value;
       document.getElementById('dispDate').innerText = document.getElementById('orderDate').value;
 
+      // Calculate totals
       const names = document.querySelectorAll('.item-name');
       const qtys = document.querySelectorAll('.item-qty');
       const prices = document.querySelectorAll('.item-price');
@@ -293,9 +324,9 @@
         if (name) {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td style="width: 50%;">${name}</td>
-            <td class="num" style="width: 20%;">${qty}</td>
-            <td class="num" style="width: 30%;">${lineTotal.toLocaleString()}</td>
+            <td>${name}</td>
+            <td class="num">${qty}</td>
+            <td class="num">${lineTotal.toLocaleString()}</td>
           `;
           tbody.appendChild(tr);
         }
@@ -307,7 +338,6 @@
     function downloadReceipt() {
       const ticket = document.getElementById('receiptTicket');
       html2canvas(ticket, {
-        useCORS: true,
         scale: 3
       }).then(canvas => {
         const link = document.createElement('a');
